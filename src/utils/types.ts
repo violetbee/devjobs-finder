@@ -11,3 +11,12 @@ export type Job = {
 export type JobProps = {
   jobs: Job[];
 };
+
+export type Login = {
+  email: string;
+  password: string;
+};
+
+export type LoginProps = {
+  input: Login;
+};

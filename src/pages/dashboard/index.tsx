@@ -5,7 +5,8 @@ import Layout from "../../components/Layout";
 import SearchBar from "../../components/SearchBar";
 import { Job, JobProps } from "../../utils/types";
 import { jobs } from "../../utils/jobs";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useCountdown } from "../deneme";
 
 const Index: NextPage<JobProps> = ({ jobs }) => {
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
