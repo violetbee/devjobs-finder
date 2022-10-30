@@ -1,27 +1,65 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 // Prisma adapter for NextAuth, optional and can be removed
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "../../../server/db/client";
-import { env } from "../../../env/server.mjs";
+import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
   // Include user.id on session
-  callbacks: {
-    session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
-      }
-      return session;
-    },
+  session: {
+    strategy: "jwt",
   },
+  pages: {
+    signIn: "/auth/login",
+  },
+
   // Configure one or more authentication providers
   adapter: PrismaAdapter(prisma),
   providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
+    CredentialsProvider({
+      type: "credentials",
+      credentials: {
+        email: { type: "email" },
+        password: { type: "password" },
+      },
+      async authorize(credentials, req) {
+        const { email, password } = credentials as {
+          email: string;
+          password: string;
+        };
+        const userPassword = await prisma.account.findUnique({
+          where: {
+            email,
+          },
+          select: {
+            password: true,
+          },
+        });
+
+        if (userPassword) {
+          const isEqual = bcrypt.compareSync(password, userPassword?.password);
+
+          if (isEqual) {
+            const user = await prisma.account.findUnique({
+              where: {
+                email,
+              },
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+                companyId: true,
+              },
+            });
+
+            return user;
+          }
+        }
+        return null;
+      },
     }),
     // ...add more providers here
   ],

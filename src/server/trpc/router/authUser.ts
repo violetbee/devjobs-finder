@@ -1,6 +1,7 @@
 import { router, publicProcedure } from "../trpc";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 export const authUserRouter = router({
   createUser: publicProcedure
@@ -55,7 +56,7 @@ export const authUserRouter = router({
           input.password,
           userPassword?.password
         );
-        console.log("burası");
+
         if (isEqual) {
           const user = await ctx.prisma.account.findUnique({
             where: {
@@ -69,8 +70,11 @@ export const authUserRouter = router({
               companyId: true,
             },
           });
+          const token = jwt.sign({ user }, "SDLJGHSDL1234512", {
+            expiresIn: "2 days",
+          });
           return {
-            user,
+            token,
           };
         } else {
           return "şifre yanlış";

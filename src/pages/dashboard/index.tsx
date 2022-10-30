@@ -6,11 +6,11 @@ import SearchBar from "../../components/SearchBar";
 import { Job, JobProps } from "../../utils/types";
 import { jobs } from "../../utils/jobs";
 import { useState } from "react";
-import { useCountdown } from "../deneme";
+import { useSession } from "next-auth/react";
 
 const Index: NextPage<JobProps> = ({ jobs }) => {
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
-
+  console.log(useSession());
   return (
     <Layout>
       <div className="mx-auto flex max-w-5xl flex-col gap-14">

@@ -1,14 +1,13 @@
 import { NextPage } from "next";
 import Link from "next/link";
 import { RiUser5Fill, RiLockPasswordFill } from "react-icons/ri";
-import { trpc } from "../../utils/trpc";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { signIn, useSession } from "next-auth/react";
 
 const Login: NextPage = () => {
   const [loginInfo, setLoginInfo] = useState({ email: "", password: "" });
-  const userAuth = trpc.authUser.login.useMutation();
-  const createUser = trpc.authUser.createUser.useMutation();
-
+  const session = useSession();
+  console.log(session);
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-slate-900">
       <div className="space-y-4 rounded-lg bg-white p-10">
@@ -47,9 +46,14 @@ const Login: NextPage = () => {
             />
           </div>
           <button
-            onClick={(e) => {
+            onClick={async (e) => {
               e.preventDefault();
-              userAuth.mutate(loginInfo);
+              const res = await signIn("credentials", {
+                email: loginInfo.email,
+                password: loginInfo.password,
+                callbackUrl: "/dashboard",
+              });
+              console.log(res);
             }}
             className="w-full rounded-md bg-orange-500 py-2 text-white"
           >
